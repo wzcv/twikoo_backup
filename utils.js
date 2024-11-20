@@ -109,7 +109,6 @@ class CommonService {
    */
   static handleValidData(data, entity) {
     if (data.data && data.data.length > 0) {
-      console.log(entity)
       console.info(CommonService.saveToFile(entity) ? 'File has been saved locally' : 'Failed to write or save file');
     } else {
       console.error('Data is empty, please check if there are any comments, or check using Postman');
