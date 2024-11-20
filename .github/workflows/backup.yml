@@ -3,8 +3,7 @@ name: Daily Backup
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 */3 * *'
-  
+    - cron: '0 0 */8 * *'
 
 jobs:
   backup:
@@ -25,15 +24,33 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-
+      
+    - name: Create backup directory if it does not exist
+      run: mkdir -p backup
+      
     - name: Run backup script
       run: node index.js
+    
+      
+    - name: Delete backups older than 30 days
+      run: find backup -name 'twikoo-comment-*.json' -mtime +30 -exec rm {} \;
+
+    - name: Replace existing backups if the same
+      run: |
+        for file in twikoo-comment-*.json; do
+          [ -e "$file" ] || continue
+          if [ -f "backup/$file" ] && cmp -s "$file" "backup/$file"; then
+            mv "$file" "backup/$file"
+          else
+            mv "$file" "backup/"
+          fi
+        done
 
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add .
+        git add backup/*.json
         git commit -m 'Daily backup'
         git push
       env:

@@ -58,27 +58,6 @@ class CommonService {
   }
 
   /**
-   * 将 json 内容保存到文件
-   *
-   * @param {string} content - json 响应内容
-   * @return {boolean} - 是否保存成功
-   */
-  static saveToFile(content) {
-    try {
-      const jsonData = content;
-      const currentDate = new Date().toISOString().split('T')[0];
-      const fileNameWithDate = `${CommonService.TWIKOO_COMMENT_JSON}-${currentDate}.json`;
-      const dataArray = jsonData.data;
-
-      fs.writeFileSync(fileNameWithDate, JSON.stringify(dataArray, null, 2));
-      console.info(`File saved successfully: ${path.resolve(fileNameWithDate)}`);
-      return true;
-    } catch (error) {
-      console.error('Failed to create JSON file:', error);
-      return false;
-    }
-  }
-  /**
    * 构建请求参数
    *
    * @param {string} password - twikoo 密码
@@ -91,6 +70,36 @@ class CommonService {
       [CommonService.EVENT]: CommonService.COMMENT_EXPORT_FOR_ADMIN
     };
   }
+
+  /**
+   * 处理有效数据
+   *
+   * @param {Object} data - 包含待处理数据的对象
+   * @param {string} entity - 评论数据内容
+   */
+  static saveToFile(content) {
+    try {
+      const jsonData = content;
+      const currentDate = new Date().toISOString().split('T')[0];
+      const fileNameWithDate = `${CommonService.TWIKOO_COMMENT_JSON}-${currentDate}.json`;
+      const backupDir = path.resolve('backup');
+
+      if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir);
+      }
+
+      const filePath = path.join(backupDir, fileNameWithDate);
+      const dataArray = jsonData.data;
+
+      fs.writeFileSync(filePath, JSON.stringify(dataArray, null, 2));
+      console.info(`File saved successfully: ${filePath}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to create JSON file:', error);
+      return false;
+    }
+  }
+
 
   /**
    * 处理有效数据
